@@ -1,34 +1,38 @@
 # setting up pgp with Evolution
 
-gpg --list-keys
-gpg --fingerprint xyz@gmail.com
-gpg --sign-key xyz@gmail.com
-
-# Adele Robot for testing
-
-gpg --keyserver pgp.mit.du --search-keys adele-en@gnupp.de
-gpg --search-keys adele-en@gnupp.de
-gpg --import adele-en@gnupp.de
-gpg --sign-key adele-en@gnupp.de
-
 # These must be installed on the system:
 
 gnupg2
 gnupg-agent
 pinentry-gtk2
 
+# Workaround with PGP:
+
+gpg --list-keys
+gpg --import xyz.asc    # import recipient's pub keys, and my pub_and_private key
+gpg --fingerprint xyz@gmail.com
+gpg --sign-key xyz@gmail.com
+
+# Adele Robot for testing purposes
+
+gpg --keyserver pgp.mit.du --search-keys adele-en@gnupp.de
+gpg --search-keys adele-en@gnupp.de
+gpg --import adele-en@gnupp.de
+gpg --sign-key adele-en@gnupp.de
 
 # in Evolution:
 
 I checked in Security Tab : Always trust keys in my keyring when encrypting
 
-# gnome keyring issue on Crunchbang++
+# The Gnome Keyring issue on Crunchbang++                 # it might not be an issue on other distros...
 
 in ~/.config/openbox/autostart  I edited this section:
 
 ## GNOME PolicyKit and Keyring
 
-eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh) &  # I removed gpg from the end !
+eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh) &      # I removed gpg from the end
 
 Then, in ~/.gnupg/gpg.conf   I inserted:
 use-agent
+
+# system reboot
