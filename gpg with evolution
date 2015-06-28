@@ -9,7 +9,7 @@ pinentry-gtk2
 # Workaround with PGP:
 
 gpg --list-keys
-gpg --import xyz.asc    # import recipient's pub keys, and my pub_and_private key
+gpg --import xyz.asc                          # importing recipient's pub keys, and my pub_and_private key
 gpg --fingerprint xyz@gmail.com
 gpg --sign-key xyz@gmail.com
 
