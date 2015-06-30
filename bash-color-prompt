@@ -1,0 +1,8 @@
+# user .basrc file:
+
+PS1='\[\033[1;32m\]\u@\h # \[\033[0m\]'
+
+# root .bashrc file:
+
+PS1='\[\033[1;31m\]\u@\h # \[\033[0m\]'
+
