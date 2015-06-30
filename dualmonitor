@@ -1,6 +1,7 @@
 #!/bin/bash
 
-usage="Usage: $0 -on OR -off"
+a=`basename $0`
+usage="Usage: $a [-on] [-off]"
 
 if [ $# -eq 0 ] ; then
   echo $usage
