@@ -12,6 +12,8 @@ elif [ "$1" = "-on" ] ; then
 elif [ "$1" = "-off" ] ; then
   xrandr --output VGA1 --off
   xrandr --output LVDS1 --mode 1366x768
+  pkill conky
+  conky &
 else
   echo $usage
 fi
