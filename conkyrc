@@ -2,10 +2,6 @@
 #
 # The list of variables has been removed from this file in favour
 # of keeping the documentation more maintainable.
-# conky configuration
-#
-# The list of variables has been removed from this file in favour
-# of keeping the documentation more maintainable.
 # Check http://conky.sf.net for an up-to-date-list.
 #
 # For ideas about how to modify conky, please see:
@@ -50,6 +46,7 @@ override_utf8_locale no
 #  Output
 ##############################################
 TEXT
+#S Y S T E M    I N F O
 ${font Sans:size=9:weight=bold}${color red2}S Y S T E M    I N F O${color}${font}
 ${hr}
 Host:$alignr$nodename
@@ -61,18 +58,31 @@ CPU usage:$alignr${cpu cpu0}%
 
 ${font Sans:size=9:weight=bold}${color red1}E M A C S${color}${font}
 ${hr}
+C-x C-f$alignr Visit file
 C-g$alignr Quit
 C-x C-c$alignr Exit
-C-x C-f$alignr Visit file
 C-x k$alignr Kill buffer
-
-k e y b o a r d    mo t i o n s
+C-x C-s$alignr Saves without prompt
+C-x s$alignr Saves all files
+C-s C-w$alignr Save As
+${hr}
+K e y b o a r d    mo t i o n s
 
 C-f $alignr move fw 1 char
 C-b $alignr move bw 1 char
 M-f $alignr move fw 1 word
 M-b $alignr move bw 1 word
+${hr}
+C o p y   &   C u t   &   P a s t e
 
+M-w$alignr  copy
+C-w$alignr   cut
+C-y$alignr   yank (paste)
+C-k$alignr kill until EOL
+
+H i g h l i g h t
+
+C-space$alignr marking
 
 
 
@@ -91,4 +101,3 @@ Super+l$alignr Lock Screen
 Super+v$alignr Volume Control
 Super+x$alignr Logout
 #PrtSc$alignr Screenshot
-
