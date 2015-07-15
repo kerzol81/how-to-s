@@ -1,0 +1,21 @@
+Address Space Layout Randomization - Virtual Address Randomization
+
+- above 2.6 kernel
+- cat /proc/PID/maps
+
+
+echo 0 >/proc/sys/kernel/randomize_va_space
+
+0 - no randomization
+1 - randomization
+2 - full randomization
+
+1 and 2 means that stack will start at different places in memory
+
+
+GDB
+-set disassembly-flavor intel
+
+GCC
+gcc -ggdb -mpreferred-stack-boundary=2    [n pow 2 -> n=2]
+
