@@ -1,0 +1,18 @@
+GDB usage
+
+-disas function name [main or any function]
+-b 9    sets a breakpoint at line 9
+-s      steps
+-c      continue throug the breakpoint
+-info registers
+
+Examine memory: [help x]
+
+x/10xw 0xfffff410
+
+10: number of units
+x: hex
+w: words      [Stack operation happens in word boundary]
+
+"Show me 10 units displayed as hex in bytes from the given memory location starting point"
+
