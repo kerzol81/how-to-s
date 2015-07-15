@@ -1,0 +1,7 @@
+# to survive reboot
+
+apt-get install iptables-persistent
+
+iptables-save > /etc/iptables/rules.v4    [there is also a file for ipv6]
+
+service iptables-persistent start
