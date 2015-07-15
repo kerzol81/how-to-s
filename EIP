@@ -2,7 +2,7 @@ The CPU decides which instruction to execute NEXT by reading
 the value of the EIP register and executes the instruction that is
 located in that address.
 
-If EIP register contains the example address: 0x77da22ca and that memory
+If EIP register contains for instance: 0x77da22ca and that memory
 address stores the code: \xff\xe4 [JMP ESP] than the CPU will execute that.
 
 Avoid: \x00 \x0a \x0d
