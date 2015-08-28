@@ -1,0 +1,5 @@
+# /etc/proftd/proftpd.conf
+
+# jail user:
+
+DefaultRoot /home/pi  pi
