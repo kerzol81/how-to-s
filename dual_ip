@@ -1,0 +1,17 @@
+# dual ip config file on eth0
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+auto eth0:0
+
+allow-hotplug eth0
+
+iface eth0 inet dhcp
+
+iface eth0:0 inet static
+address 192.168.88.200
+netmask 255.255.255.0
+gateway 192.168.88.1
+nameserver 8.8.8.8
