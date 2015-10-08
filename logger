@@ -1,0 +1,10 @@
+#!/bin/bash
+
+function debug_log () {
+    logger -t $0 -i -s -- $USER : $BASH_COMMAND
+}
+ 
+trap debug_log DEBUG
+ 
+echo "ta-ta"
+exit 0
