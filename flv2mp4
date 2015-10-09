@@ -1,0 +1,1 @@
+for i in $(ls *flv); do ffmpeg -i $i -vcodec libx264 -acodec libfdk_aac -b:a 128k $i.mp4; done;
