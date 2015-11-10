@@ -7,20 +7,20 @@ while (($counter < 10)
       ping IP
       if exit code > 0:
             counter = counter + 1
-            wait 1 min
+            delay 60
       
-      elif counter = 5:
-            status = suspicious
+      elif (($counter == 10)
+            status = 'suspicious'
             send email with status
             
       
-      elif counter = 10:
+      elif (($counter == 10)
             status = 'disconnected'
             send sms with status
             reboot
       
       else:
         counter = 0
-        wait 1 min
+        delay 60
       
       
