@@ -1,0 +1,20 @@
+IP = x.y.z.a
+status = connected
+counter = 0
+
+while true:
+
+      ping IP
+      if exit code > 0:
+        counter = counter + 1
+        wait 1 min
+      
+      elif counter = 5:
+        send sms
+      
+      elif counter = 10:
+        reboot
+      
+      else:
+        counter = 0
+        wait 5 min
