@@ -9,7 +9,7 @@ while (($counter < 10)
             counter = counter + 1
             delay 60
       
-      elif (($counter == 10)
+      elif (($counter == 5)
             status = 'suspicious'
             send email with status
             
