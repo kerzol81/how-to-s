@@ -19,6 +19,6 @@ while true:
       
       else:
         counter = 0
-        wait 5 min
+        wait 1 min
       
       
