@@ -1,8 +1,8 @@
-IP = x.y.z.a
-status = 'connected'
-counter = 0
+:local IP = 1.2.3.4
+:local status = 'connected'
+:local counter = 0
 
-while true:
+while (($counter < 10)
 
       ping IP
       if exit code > 0:
