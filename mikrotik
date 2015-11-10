@@ -1,5 +1,5 @@
 IP = x.y.z.a
-status = connected
+status = 'connected'
 counter = 0
 
 while true:
@@ -11,10 +11,12 @@ while true:
       
       elif counter = 5:
             status = suspicious
-            send sms
+            send email with status
+            
       
       elif counter = 10:
-            status = disconnected
+            status = 'disconnected'
+            send sms with status
             reboot
       
       else:
