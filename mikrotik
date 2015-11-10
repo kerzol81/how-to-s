@@ -6,15 +6,19 @@ while true:
 
       ping IP
       if exit code > 0:
-        counter = counter + 1
-        wait 1 min
+            counter = counter + 1
+            wait 1 min
       
       elif counter = 5:
-        send sms
+            status = suspicious
+            send sms
       
       elif counter = 10:
-        reboot
+            status = disconnected
+            reboot
       
       else:
         counter = 0
         wait 5 min
+      
+      
