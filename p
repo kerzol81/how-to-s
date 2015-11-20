@@ -5,6 +5,12 @@ Make the following changes to your compute_bill function:
     If the item is in stock and after you add the price to the total, subtract one from the item's stock count.
 """
 
+"""
+    error message on codeacademy's built in python interpreter:
+    Oops, try again. calling compute_bill with a list containing 2 apples, 1 orange and 7 bananas 
+    resulted in 29.5 instead of the correct 25.5
+"""
+
 shopping_list = ["banana", "orange", "apple"]
 
 stock = {
@@ -25,6 +31,18 @@ prices = {
 def compute_bill(food):
     total = 0
     for i in food:
-        if stock[i] > 0:
+        if stock[i] >= 0:
             total = total + prices[i]
-    return total
+	return total
+
+"""
+	testing:
+	the second test results 0, because apple is the first item
+"""  
+food = ['pear', 'orange','apple']
+
+print compute_bill(food)
+
+food = ['apple','pear', 'orange']
+
+print compute_bill(food)
