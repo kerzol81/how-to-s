@@ -6,9 +6,9 @@
 """
 
 """
-    error message on codeacademy's built in python interpreter:
-    Oops, try again. calling compute_bill with a list containing 2 apples, 1 orange and 7 bananas 
-    resulted in 29.5 instead of the correct 25.5
+	error message on codeacademy's built in python interpreter:
+	Oops, try again. calling compute_bill with a list containing 2 apples, 1 orange and 7 bananas 
+	resulted in 29.5 instead of the correct 25.5
 """
 
 shopping_list = ["banana", "orange", "apple"]
