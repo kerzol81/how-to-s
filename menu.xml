@@ -24,12 +24,20 @@
 		<item label="Iceweasel">
 			<action name="Execute">
 				<command>
-					x-www-browser
+					iceweasel
 				</command>
 			</action>
 		</item>
 		
-		<item label="e-mail">
+		<item label="Chromium">
+			<action name="Execute">
+				<command>
+					chromium
+				</command>
+			</action>
+		</item>
+		
+		<item label="Evolution">
 			<action name="Execute">
 				<command>
 					evolution
@@ -206,10 +214,10 @@
 					</command>
 				</action>
 			</item>
-			<item label="Transmission BitTorrent Client">
+			<item label="Deluge Client">
 				<action name="Execute">
 					<command>
-						transmission-gtk
+						deluge-gtk
 					</command>
 				</action>
 			</item>
