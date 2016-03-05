@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]
+  then echo 'Google Chrome fix, and update script' && echo 'Run it as root'
+  exit 1
+fi
+
+sed -i -e 's/deb http/deb [arch=amd64] http/' "/etc/apt/sources.list.d/google-chrome.list"
+sed -i -e 's/deb http/deb [arch=amd64] http/' "/opt/google/chrome/cron/google-chrome"
+apt-get update -y && apt-get dist-upgrade -y
+
+exit 0
