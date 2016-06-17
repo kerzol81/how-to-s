@@ -3,3 +3,5 @@
 1. Format the USB to NTFS, make it bootable, with gparted
 
 2. sudo winusb --install windows_7.iso /dev/sdb1
+
+3. in case of driver problem, disable USB 3.0
