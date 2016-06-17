@@ -1,4 +1,4 @@
-# To Crete a Bootable Windows 7 USB stick:
+# To Create a Bootable Windows 7 USB stick:
 
 1. Format the USB to NTFS, make it bootable, with gparted
 
