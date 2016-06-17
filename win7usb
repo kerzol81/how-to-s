@@ -1,0 +1,5 @@
+# To Crete a Bootable Windows 7 USB stick:
+
+1. Format the USB to NTFS, make it bootable, with gparted
+
+2. sudo winusb --install windows_7.iso /dev/sdb1
