@@ -1,0 +1,1 @@
+sudo dd if=clonezilla-live-20160627-yakkety-i386.iso of=/dev/sdb1 bs=4M;sync
