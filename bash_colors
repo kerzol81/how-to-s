@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo_black() { echo "$(tput setaf 0)$*$(tput setaf 9)"; }
+echo_red() { echo "$(tput setaf 1)$*$(tput setaf 9)"; }
+echo_green() { echo "$(tput setaf 2)$*$(tput setaf 9)"; }
+echo_yellow() { echo "$(tput setaf 3)$*$(tput setaf 9)"; }
+echo_blue() { echo "$(tput setaf 4)$*$(tput setaf 9)"; }
+echo_magenta() { echo "$(tput setaf 5)$*$(tput setaf 9)"; }
+echo_cyan() { echo "$(tput setaf 6)$*$(tput setaf 9)"; }
+echo_white() { echo "$(tput setaf 7)$*$(tput setaf 9)"; }
+
+echo_red "hello world"
