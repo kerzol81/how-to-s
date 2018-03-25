@@ -1,0 +1,1 @@
+youtube-dl --output "%(playlist_index)s-%(title)s" URL
