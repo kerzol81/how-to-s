@@ -1,0 +1,13 @@
+# creating a function
+
+:global SetTime do={
+
+system ntp client set primary-ntp=148.6.0.1 enabled=yes
+system clock set time-zone-name=Europe/Budapest
+
+}
+
+
+# calling a function
+
+$SetTime
