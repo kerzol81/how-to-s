@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 Type=simple
 User=deluge
-Group=debian-deluged
+Group=deluge
 UMask=000
 ExecStart=/usr/bin/deluged -d
 Restart=on-failure
