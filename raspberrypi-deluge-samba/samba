@@ -1,0 +1,15 @@
+sudo apt-get install samba
+sudo smbpasswd -a pi
+
+# append to /etc/samba/smb.conf
+
+[torrent]
+path = /torrent
+available = yes
+valid users = pi
+read only = no
+browseable = yes
+public = yes
+writeable = yes
+
+systemctl daemon-reload
