@@ -1,0 +1,11 @@
+apt-get update -y
+apt-get dist-upgrade -y
+
+adduser --disabled-password --system --home /var/lib/deluge -gecos "Deluge service" --group deluge
+
+apt-get install deluged -y
+apt-get install deluge-webui -y
+
+cd /etc/systemd/system/
+touch deluged.service
+touch delug-web.service
