@@ -1,0 +1,15 @@
+[Unit]
+Description=Deluge Bittorrent Client Web Interface
+Documentation=man:deluged
+After=network-online.target
+
+[Service]
+Type=simple
+User=deluge
+Group=debian-deluged
+UMask=027
+ExecStart=/usr/bin/deluge-web
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
