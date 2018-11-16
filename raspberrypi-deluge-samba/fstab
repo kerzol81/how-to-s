@@ -1,3 +1,3 @@
-# automount external usb with fstab:
+# automount external usb drive with fstab:
 
 /dev/sda5	/torrent	ext3	auto,nofail,noatime,users,rw,uid=pi,gid=pi	0	0
