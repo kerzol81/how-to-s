@@ -1,2 +1,2 @@
-mkdir -p /torrent
-chown -R pi:pi /torrent/
+sudo mkdir -p /torrent
+sudo chown pi:deluge /torrent
