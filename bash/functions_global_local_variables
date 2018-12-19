@@ -1,0 +1,20 @@
+#!/bin/bash
+
+a='global variable'
+
+functionA(){
+        
+        echo "$a"
+}
+
+functionA
+
+
+###
+
+functionB(){
+	local b='local variable'
+	echo "$b"
+}
+
+echo "$b"
