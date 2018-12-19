@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# converting iPhone QuickTime 4K videos to Matroska HD1080 
+
 for i in $(find . -type f -name "*.mov");do
 
 ffmpeg -i "$i" -c:a copy -s hd1080 "$i_HD1080.mkv"
