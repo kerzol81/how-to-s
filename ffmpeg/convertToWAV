@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# converting iPhone QuickTime 4K videos to wav
+
+#!/bin/bash
+
+for i in *.mov; do
+   
+   ffmpeg -i "$i" -vn "$i".wav
+
+done
