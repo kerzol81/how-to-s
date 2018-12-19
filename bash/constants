@@ -1,0 +1,7 @@
+#!/bin/bash
+
+declare -r a=2
+declare -r b='aaa'
+
+echo "$a"
+echo "$b"
