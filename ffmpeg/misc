@@ -1,0 +1,45 @@
+# Mic:
+
+ffmpeg -ar 8000 -f alsa -i hw:0 -acodec mp2 -b:a 128k -f rtp rtp://localhost:4444
+
+
+# A
+ffmpeg -re -f lavfi -i aevalsrc="sin(440*2*PI*t)" -ar 8000 -f mulaw -f rtp rtp://127.0.0.1:4444
+
+# waveform
+ffmpeg -i SampleAudio_0.7mb.mp3 -filter_complex "[0:a]showwaves=s=640x480:mode=line,format=yuv420p[v]" -map "[v]" -map 0:a -c:v libx264 -c:a copy output.mp4
+
+ffmpeg -ar 8000 -f alsa -i hw:0 -acodec mp2 -b:a 128k -filter_complex "[0:a]showwaves=s=1280x720:mode=line,format=yuv420p[v]" -map "[v]" -map 0:a -c:v libx264 -c:a copy -f rtp rtp://localhost:4444
+
+ffmpeg -ar 8000 -f alsa -i hw:0 -acodec mp2 -b:a 128k -filter_complex "[0:a]showwaves=s=1280x720:mode=line:rate=25,format=yuv420p[v]" -map "[v]" -map 0:a output.mp4
+
+# spectrum
+
+ffmpeg -i input.wav -lavfi showspectrumpic=s=hd1080 output.jpg
+
+
+Extract An Audio Waveform
+
+ffmpeg -i ‘Vid-in.mp4’ -filter_complex “[0:a]showwaves=s=1280×720:mode=line,format=yuv420p[v]” -map “[v]” -map 0:a -c:v libx264 -c:a copy “Vid-out.mkv”
+
+This will output a video file with an Audio Graph, But Audio Graphs can be switched or changed around with different parameters: If you get the error message: Unable to parse option value 1280:720 as image size then right above that should specify the image size you can go: yuv420p, 1920×1012
+
+showcqt=s=1280×720
+
+showvolume=f=1:b=4:w=720:h=50
+
+avectorscope=s=640×518,pad=1280:720
+
+showfreqs=mode=line,format=yuv420p
+
+showfreqs=mode=cline,format=yuv420p
+
+showwaves=colors=blue:s=1280×720:mode=line
+
+showwaves=colors=blue:s=1280×720:mode=cline
+
+showfreqs=mode=line:fscale=log,format=yuv420p
+
+showspectrum=mode=separate:color=intensity:scale=cbrt:s=640×518
+
+showspectrum=mode=separate:color=intensity:slide=1:scale=cbrt:s=640×518
