@@ -1,0 +1,12 @@
+#!/bin/bash
+
+CHOICES=(
+  'aaa'
+  'bbb'
+  'ccc'
+  'ddd'
+  'eee'
+)
+r=$[ $RANDOM % ${#CHOICES[@]} ]
+
+echo "${CHOICES[$r]}"
