@@ -1,0 +1,1 @@
+ffmpeg -i $in -metadata:s:v rotate="270" -codec copy $out
