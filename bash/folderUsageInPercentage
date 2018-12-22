@@ -1,0 +1,19 @@
+#!/bin/bash
+
+getPercentageOfFolder(){
+	local FOLDER="/home/zoli"
+
+	PERCENTAGE=$(df -h | grep "$FOLDER" | awk '{ print $5}' | sed 's/%//')
+
+	INT='^[0-9]+$'
+
+	if ! [[ $PERCENTAGE =~ $INT ]] ; then
+		echo "[!] Error, Could not calculate" >&2; exit 1
+	else
+		echo "$PERCENTAGE"
+	fi
+}
+
+p=$(getPercentageOfFolder)
+
+echo "$p"
