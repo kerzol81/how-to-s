@@ -1,6 +1,6 @@
 #!/bin/bash
 #set -x
-SD_CARD="/dev/sda1"
+SD_CARD="/mnt/data"
 LIMIT=60
 
 getPercentageOfSD_CARD(){
@@ -8,7 +8,7 @@ getPercentageOfSD_CARD(){
 
 	INT='^[0-9]+$'
 
-	if ! [[ $PERCENTAGE =~ $INT ]] ; then
+	if ! [[ "$PERCENTAGE" =~ $INT ]] ; then
 		echo "[!] Error, Could not calculate" >&2; exit 1
 	else
 		echo "$PERCENTAGE"
@@ -20,6 +20,8 @@ removeOldestFile(){
 	echo "$OLDEST_FILE"
 	}
 
-if [ $(getPercentageOfSD_CARD) -gt "$LIMIT" ]; then
+if [ "$(getPercentageOfSD_CARD)" -gt "$LIMIT" ]; then
 	removeOldestFile
 fi
+
+#getPercentageOfSD_CARD
