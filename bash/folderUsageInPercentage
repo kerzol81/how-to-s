@@ -1,5 +1,7 @@
 #!/bin/bash
 
+LIMIT=91
+
 getPercentageOfFolder(){
 	local FOLDER="/home/zoli"
 
@@ -14,6 +16,10 @@ getPercentageOfFolder(){
 	fi
 }
 
-p=$(getPercentageOfFolder)
+doSomething(){
+	echo "More than the $LIMIT %"
+	}
 
-echo "$p"
+if [ $(getPercentageOfFolder) -gt "$LIMIT" ]; then
+	doSomething
+fi
