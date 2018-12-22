@@ -4,24 +4,28 @@ SD_CARD="/mnt/data"
 LIMIT=60
 
 getPercentageOfSD_CARD(){
+	if [ ! -d "$SD_CARD" ]; then
+		echo "[!] Does not exist" >&2; exit 1
+	fi
+	
 	PERCENTAGE=$(df -h | grep "$SD_CARD" | awk '{ print $5}' | sed 's/%//')
 
 	INT='^[0-9]+$'
 
 	if ! [[ "$PERCENTAGE" =~ $INT ]] ; then
-		echo "[!] Error, Could not calculate" >&2; exit 1
+		echo "[!] Error, Could not calculate" >&2; exit 2
 	else
 		echo "$PERCENTAGE"
 	fi
 }
 
 removeOldestFile(){
-	OLDEST_FILE=$(find $SD_CARD -type f -printf '%T+ %p\n' | sort | head -n 1)
+	OLDEST_FILE=$(find $SD_CARD -type f | sort | head -n 1)
 	echo "$OLDEST_FILE"
 	}
+
+
 
 if [ "$(getPercentageOfSD_CARD)" -gt "$LIMIT" ]; then
 	removeOldestFile
 fi
-
-#getPercentageOfSD_CARD
