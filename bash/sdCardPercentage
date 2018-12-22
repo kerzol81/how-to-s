@@ -20,8 +20,6 @@ removeOldestFile(){
 	echo "$OLDEST_FILE"
 	}
 
-if [ $(getPercentageOfFolder) -gt "$LIMIT" ]; then
+if [ $(getPercentageOfSD_CARD) -gt "$LIMIT" ]; then
 	removeOldestFile
 fi
-
-#getPercentageOfSD_CARD
