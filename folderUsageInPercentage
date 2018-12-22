@@ -1,0 +1,5 @@
+#!/bin/bash
+
+FOLDER="/home/zoli"
+
+PERCENTAGE=$(df -h | grep "$FOLDER" | awk '{ print $5}' | sed 's/%//')
