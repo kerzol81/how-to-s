@@ -1,10 +1,9 @@
 #!/bin/bash
+set -x
+SD_CARD="/mnt/data"
+LIMIT=60
 
-LIMIT=91
-
-getPercentageOfFolder(){
-	local FOLDER="/home/zoli"
-
+getPercentageOfSD_CARD(){
 	PERCENTAGE=$(df -h | grep "$FOLDER" | awk '{ print $5}' | sed 's/%//')
 
 	INT='^[0-9]+$'
@@ -16,10 +15,11 @@ getPercentageOfFolder(){
 	fi
 }
 
-doSomething(){
-	echo "More than the $LIMIT %"
+removeOldestFile(){
+	OLDEST_FILE=$(find $FOLDER -type f -printf '%T+ %p\n' | sort | head -n 1)
+	echo "$OLDEST_FILE"
 	}
 
-if [ $(getPercentageOfFolder) -gt "$LIMIT" ]; then
-	doSomething
-fi
+#if [ $(getPercentageOfFolder) -gt "$LIMIT" ]; then
+#	removeOldestFile
+#fi
