@@ -1,5 +1,6 @@
 #!/bin/bash
 # how many seconds have left until next 5 minutes cycle cron job
+# not fully tested yet!!!
 set -x
 
 date +"%H:%M:%S" >> test.txt
