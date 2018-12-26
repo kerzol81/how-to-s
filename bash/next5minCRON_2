@@ -3,6 +3,7 @@
 # how many seconds have left until next 5-minute-cyclic cron job.
 # the script exits if started at the same time when the cron job is scheduled
 
+# EPOCH TIME
 # date +%s -> number of SECONDS that have elapsed since 00:00:00 Thursday, 1 January 1970
 
 date +"%H:%M:%S" >>test3.txt
