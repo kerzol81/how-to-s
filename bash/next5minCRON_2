@@ -5,6 +5,7 @@
 
 # EPOCH TIME
 # date +%s -> number of SECONDS that have elapsed since 00:00:00 Thursday, 1 January 1970
+# Thank you for berndbausch from www.linuxquestions.org !
 
 DIFF=$((300-$(date +%s)%300))
 
