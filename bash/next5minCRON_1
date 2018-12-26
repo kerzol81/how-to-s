@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # how many seconds have left until next 5-minute-cyclic cron job
-# Thanks for Iris
+# Thanks for my beautiful girlfriend, Iris
 
 CURRENT_MINUTES=$(date +'%M' | cut -c 2-)
 CURRENT_SECONDS=$(date +'%-S')
