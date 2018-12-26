@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# how many seconds have left until next 5-minute-cyclic cron job
+set -x
+
+date +"%H:%M:%S" >>test3.txt
+
+R=$((300-$(date +%s)%300))
+
+if [ "$R" -eq 300 ];then
+	exit 1
+fi
+
+echo "$R" >> test3.txt
+
+exit 0
