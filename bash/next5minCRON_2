@@ -6,8 +6,6 @@
 # EPOCH TIME
 # date +%s -> number of SECONDS that have elapsed since 00:00:00 Thursday, 1 January 1970
 
-date +"%H:%M:%S" >>test3.txt
-
 DIFF=$((300-$(date +%s)%300))
 
 if [ "$R" -eq 300 ];then
