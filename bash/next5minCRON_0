@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# how many seconds have left until next 5-minute-cyclic cron job
+set -x
+
+date +"%H:%M:%S"
+
+CURRENT_MINUTES=$(date +'%M' | cut -c 2-)
+CURRENT_SECONDS=$(date +'%-S')
+
+if [ "$CURRENT_MINUTES" -eq 0 ] && [ "$CURRENT_SECONDS" -eq 0 ]; then
+	exit 0
+
+elif [ "$CURRENT_MINUTES" -eq 0 ] || [ "$CURRENT_MINUTES" -eq 5 ] && [ "$CURRENT_SECONDS" -eq 0 ]; then
+	exit 0
+	
+elif [ "$CURRENT_MINUTES" -gt 0 ] && [ "$CURRENT_MINUTES" -lt 5 ];then
+	MINUTES_LEFT=$((4-"$CURRENT_MINUTES"))
+	SECONDS_LEFT=$((60-"$CURRENT_SECONDS"))
+	R=$((MINUTES_LEFT*60+SECONDS_LEFT))
+	
+elif [ "$CURRENT_MINUTES" -gt 5 ] && [ "$CURRENT_MINUTES" -lt 10 ];then
+	MINUTES_LEFT=$((9-"$CURRENT_MINUTES"))
+	SECONDS_LEFT=$((60-"$CURRENT_SECONDS"))
+	R=$((MINUTES_LEFT*60+SECONDS_LEFT))
+	
+elif [ "$CURRENT_MINUTES" -eq 0 ] || [ "$CURRENT_MINUTES" -eq 5 ] && [ "$CURRENT_SECONDS" -gt 0 ];then
+	SECONDS_LEFT=$((60-"$CURRENT_SECONDS"))
+	R=$((SECONDS_LEFT+240))
+
+else
+	exit 1
+fi
+
+echo "$R" >> test.txt
+
+exit 0
