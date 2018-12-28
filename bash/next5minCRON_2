@@ -8,12 +8,12 @@
 # date +%s -> number of SECONDS that have elapsed since 00:00:00 Thursday, 1 January 1970
 # Thank you for berndbausch from www.linuxquestions.org !
 
-DIFF=$((300-$(date +%s)%300))
+SEC=$((300-$(date +%s)%300))
 
 if [ "$R" -eq 300 ];then
 	exit 1
 fi
 
-echo "$DIFF"
+echo "$SEC"
 
 exit 0
