@@ -5,3 +5,5 @@ SEC=300
 #!/bin/sh
 
 arecord -f cd --max-file-time 300 --use-strftime %Y-%m-%d__%H_%M.wav | tee vlc -I dummy :sout=#transcode{acodec=mp3,ab=128,channels=2}:duplicate{dst=std{access=http,mux=raw,dst=localhost:554}}
+
+# arecord -f cd --max-file-time 300 --use-strftime %Y-%m-%d__%H_%M.wav | tee vlc -I dummy :sout '#standard{access=http,mux=ogg,dst=localhost:554}'
