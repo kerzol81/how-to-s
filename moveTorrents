@@ -1,0 +1,15 @@
+#!/bin/bash
+# run with cron in every minute
+
+SHARE="/run/user/1000/gvfs/smb-share:server=synology.local,share=torrents"
+LOCAL="/home/$USER/Downloads"
+
+cd "$SHARE" 2> /dev/null || exit 1
+cd "$LOCAL" 2> /dev/null || exit 2
+
+for i in ./*.torrent;do
+        cp -p "$i" "$SHARE" 2> /dev/null
+        rm "$i" 2> /dev/null
+done
+
+exit 0
