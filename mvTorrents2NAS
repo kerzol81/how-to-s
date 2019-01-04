@@ -1,4 +1,5 @@
 #!/bin/bash
+# 
 # run with cron in every minute
 
 SHARE="/run/user/1000/gvfs/smb-share:server=synology.local,share=torrents"
