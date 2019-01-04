@@ -1,0 +1,5 @@
+#!/bin/sh
+
+SEC=300
+
+arecord -f cd --max-file-time "300" --use-strftime %Y-%m-%d__%H_%M.wav
