@@ -1,6 +1,12 @@
 import os
 
-os.system("taskkill /f /im notepad.exe")
-os.system("taskkill /f /im chrome.exe")
+processes = ['notepad.exe', 'chrome.exe', 'vlc.exe']
+delay = 10
 
-os.system("shutdown /r /t 10")
+for process in processes:
+    print("[+] Killing: {}".format(process))
+    os.system("taskkill /f /im {}".format(process))
+
+
+print("[*] Windows will restart in {} seconds".format(delay))
+os.system("shutdown /r /t {}".format(delay))
