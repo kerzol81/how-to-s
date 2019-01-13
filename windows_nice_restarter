@@ -1,0 +1,6 @@
+import os
+
+os.system("taskkill /f /im notepad.exe")
+os.system("taskkill /f /im chrome.exe")
+
+os.system("shutdown /r /t 10")
