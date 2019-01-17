@@ -1,4 +1,5 @@
 # restart an Axis Camera with VAPIX
+# insert into Mikrotik's scheduler 
 
 :local IP "10.0.0.100"
 :local USERNAME "root"
