@@ -1,0 +1,9 @@
+# restart an Axis Camera with VAPIX
+
+:local IP "10.0.0.100"
+:local USERNAME "root"
+:local PASSWORD "root"
+
+:do {
+      :tool fetch "http://$USERNAME:$PASSWORD@$IP/axis-cgi/jpg/image.cgi" mode=http keep-result=no;
+} on-error={ :tool fetch "http://$USERNAME:$PASSWORD@$IP/axis-cgi/restart.cgi};
