@@ -47,7 +47,8 @@ add action=accept chain=input comment="Accept all connections from local network
 add action=drop chain=input comment="Drop invalid packets" connection-state=invalid
 add action=drop chain=input comment="Drop all packets which are not destined to routes IP address" dst-address-type=!local
 add action=drop chain=input comment="Drop all packets which does not have unicast source IP address" src-address-type=!unicast
-add action=drop chain=input comment="Drop all packets from public internet which should not exist in public network" in-interface=$wanInterface src-address-list=$bogonIpList
+add action=drop chain=input comment="Drop Bogons" in-interface=$wanInterface src-address-list=$bogonIpList
+add action=drop chain=input in-interface=$wanInterface log=yes log-prefix="input drop" 
 
 # FORWARD
 
