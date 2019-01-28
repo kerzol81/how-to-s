@@ -1,0 +1,21 @@
+#!/bin/bash
+set -x
+folder="/home/$USER/recordings"
+ffserver -f /etc/ffserver.conf &
+sleep 3
+
+mkdir -p "$folder"
+day=$(date '+%Y-%m-%d')
+mkdir -p "$folder"/"$day"
+
+mkfifo fifo1 2>/dev/null
+
+while true;do
+	mkdir -p "$folder"
+	day=$(date '+%Y-%m-%d')
+	mkdir -p "$folder"/"$day"
+	ffmpeg -f alsa -i hw:0,0 http://localhost:4444/audio.ffm -f wav pipe:1 > fifo1 &
+	ffmpeg -i fifo1 -ss 0 -t 300 -ar 44100 "$folder"/"$day"/"$(date '+%Y-%m-%d__%H_%M')".wav
+done
+
+exit 0
