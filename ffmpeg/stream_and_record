@@ -1,12 +1,10 @@
 #!/bin/bash
-set -x
+
+# streaming and recording at the same time
+
 folder="/home/$USER/recordings"
 ffserver -f /etc/ffserver.conf &
-sleep 3
-
-mkdir -p "$folder"
-day=$(date '+%Y-%m-%d')
-mkdir -p "$folder"/"$day"
+sleep 2
 
 mkfifo fifo1 2>/dev/null
 
