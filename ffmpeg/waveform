@@ -1,0 +1,1 @@
+ffmpeg -f alsa -i hw:0,0 -f lavfi -i nullsrc -filter_complex "[0:a]showwaves=mode=line:s=hd480:colors=Blue[v]" -map "[v]" -map 0:a -pix_fmt yuv420p -b:a 128k -r:a 44100 OUT.mp4
