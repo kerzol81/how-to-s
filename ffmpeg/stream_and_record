@@ -47,7 +47,7 @@ sleep 1
 ffserver -f "$ffserver_config" || exit 1 &
 sleep 2
 
-mkdir -p "$recording_folder"
+mkdir -p "$recording_folder" || exit 2
 fifo1="analog_audio"
 while true;do
 	if [ -e ${fifo1} ];then
