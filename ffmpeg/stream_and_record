@@ -23,6 +23,8 @@ CustomLog -
 	FileMaxSize 2048M
 </Feed>
 
+#
+
 <Stream audio>
 	Metadata Title "Live"
 	Feed audio.ffm
@@ -38,8 +40,6 @@ CustomLog -
 
 <Stream stat.html>
 	Format status
-
-	FaviconURL http://pond1.gladstonefamily.net:8080/favicon.ico
 </Stream>
 EOF
 
@@ -47,7 +47,7 @@ sleep 1
 ffserver -f "$ffserver_config" || exit 1 &
 sleep 2
 
-mkdir -p "$recording_folder" || exit 2
+mkdir -p "$recording_folder"
 fifo1="analog_audio"
 while true;do
 	if [ -e ${fifo1} ];then
@@ -56,8 +56,8 @@ while true;do
 	mkfifo ${fifo1} 2>/dev/null
 	day=$(date '+%Y-%m-%d')
 	mkdir -p "$recording_folder"/"$day" || exit 3
-	ffmpeg -f alsa -i hw:0,0 -acodec pcm_s16le http://localhost:"$streaming_port"/audio.ffm -f wav -ar "$recording_sample_rate" pipe:1 > ${fifo1} &
-	ffmpeg -i ${fifo1} -ss 0 -t "$recording_sec" -ar "$recording_sample_rate" "$recording_folder"/"$day"/"$(date '+%Y-%m-%d__%H_%M_%S')".wav
+	ffmpeg -f alsa -i hw:0,0 -acodec pcm_s16le http://localhost:"$streaming_port"/audio.ffm -f wav -ar "$recording_sample_rate" pipe:1 > ${fifo1} || exit 4 &
+	ffmpeg -i ${fifo1} -ss 0 -t "$recording_sec" -ar "$recording_sample_rate" "$recording_folder"/"$day"/"$(date '+%Y-%m-%d__%H_%M_%S')".wav || exit 5
 done
 
 exit 0
