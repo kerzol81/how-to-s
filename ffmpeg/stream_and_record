@@ -3,7 +3,7 @@
 set -x
 
 recording_folder="/home/$USER/recordings"
-recording_sec=30
+recording_sec=300
 recording_sample_rate=44100
 
 streaming_port=4444
