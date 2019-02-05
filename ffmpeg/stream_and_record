@@ -1,19 +1,63 @@
 #!/bin/bash
-
 # streaming and recording at the same time
+set -x
 
-folder="/home/$USER/recordings"
-ffserver -f /etc/ffserver.conf &
+recording_folder="/home/$USER/recordings"
+recording_sec=30
+recording_sample_rate=44100
+
+streaming_port=4444
+streaming_sample_rate=128
+ffserver_config="$recording_folder/audio.conf"
+
+cat > "$ffserver_config" <<EOF
+HTTPPort ${streaming_port}
+HTTPBindAddress 0.0.0.0
+MaxHTTPConnections 10
+MaxClients 10
+MaxBandwidth 1024
+CustomLog -
+
+<Feed audio.ffm>
+	File /tmp/audio.ffm
+	FileMaxSize 2048M
+</Feed>
+
+<Stream audio>
+	Metadata Title "Live"
+	Feed audio.ffm
+	Format mp2
+	Audiocodec libmp3lame
+	AudioBitRate ${streaming_sample_rate}
+	AudioChannels 2
+	AudioSampleRate 8000
+	NoVideo
+	StartSendOnKey
+</Stream>
+
+
+<Stream stat.html>
+	Format status
+
+	FaviconURL http://pond1.gladstonefamily.net:8080/favicon.ico
+</Stream>
+EOF
+
+sleep 1
+ffserver -f "$ffserver_config" || exit 1 &
 sleep 2
 
-mkfifo /tmp/fifo1 2>/dev/null
-mkdir -p "$folder"
-
+mkdir -p "$recording_folder"
+fifo1="analog_audio"
 while true;do
+	if [ -e ${fifo1} ];then
+		rm ${fifo1}
+	fi
+	mkfifo ${fifo1} 2>/dev/null
 	day=$(date '+%Y-%m-%d')
-	mkdir -p "$folder"/"$day"
-	ffmpeg -f alsa -i hw:0,0 http://localhost:4444/audio.ffm -f wav pipe:1 > /tmp/fifo1 &
-	ffmpeg -i /tmp/fifo1 -ss 0 -t 300 -ar 44100 "$folder"/"$day"/"$(date '+%Y-%m-%d__%H_%M')".wav
+	mkdir -p "$recording_folder"/"$day" || exit 3
+	ffmpeg -f alsa -i hw:0,0 -acodec pcm_s16le http://localhost:"$streaming_port"/audio.ffm -f wav -ar "$recording_sample_rate" pipe:1 > ${fifo1} &
+	ffmpeg -i ${fifo1} -ss 0 -t "$recording_sec" -ar "$recording_sample_rate" "$recording_folder"/"$day"/"$(date '+%Y-%m-%d__%H_%M_%S')".wav
 done
 
 exit 0
