@@ -1,0 +1,9 @@
+{ 
+  "token": "aaa", 
+  "refresh_token": "1//09L9nYjMKfFU", 
+  "id_token": null, 
+  "scopes": ["https://www.googleapis.com/auth/photoslibrary", "https://www.googleapis.com/auth/photoslibrary.sharing"], 
+  "token_uri": "https://oauth2.googleapis.com/token", 
+  "client_id": "a7mh45moj.apps.googleusercontent.com", 
+  "client_secret": "GOCSPX-L-2PAnYoO"
+}
