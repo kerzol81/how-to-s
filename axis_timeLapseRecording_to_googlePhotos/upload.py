@@ -111,7 +111,7 @@ def create_or_retrieve_album(session, album_title):
     for a in getAlbums(session, True):
         if a["title"].lower() == album_title.lower():
             album_id = a["id"]
-            logging.info("Uploading into EXISTING photo album -- \'{0}\'".format(album_title))
+            logging.info("Uploading into EXISTING album:  \'{0}\'".format(album_title))
             return album_id
 
 # No matches, create new album
@@ -123,7 +123,7 @@ def create_or_retrieve_album(session, album_title):
     logging.debug("Server response: {}".format(resp))
 
     if "id" in resp:
-        logging.info("Uploading into NEW photo album -- \'{0}\'".format(album_title))
+        logging.info("Uploading into NEW album: \'{0}\'".format(album_title))
         return resp['id']
     else:
         logging.error("Could not find or create photo album '\{0}\'. Server Response: {1}".format(album_title, resp))
@@ -187,7 +187,7 @@ def main():
     args = parse_args()
 
     logging.basicConfig(format='%(asctime)s %(module)s.%(funcName)s:%(levelname)s:%(message)s',
-                    datefmt='%m/%d/%Y %I_%M_%S %p',
+                    datefmt='%Y-%m-%d__%H_%M_%S',
                     filename=args.log_file,
                     level=logging.INFO)
 
@@ -195,12 +195,6 @@ def main():
 
     upload_photos(session, args.photos, args.album_name)
 
-    # As a quick status check, dump the albums and their key attributes
-
-    print("{:<50} | {:>8} | {} ".format("PHOTO ALBUM","# PHOTOS", "IS WRITEABLE?"))
-
-    for a in getAlbums(session):
-        print("{:<50} | {:>8} | {} ".format(a["title"],a.get("mediaItemsCount", "0"), str(a.get("isWriteable", False))))
 
 if __name__ == '__main__':
   main()
