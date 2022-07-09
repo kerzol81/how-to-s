@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Generator - Google API Engine @KerZol</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+</head>
+
+<style>
+    body {
+      padding: 25px;
+      line-height: 50px;
+      width: 50%;
+    }
+    </style>
+<body>
+    <h2>QR Generator - Google API</h2>
+
+    <form>
+        <div class="form-group">
+            <br>
+            <label for="QR">Data:</label>
+            <textarea id="qrdata" class="form-control" rows="4"></textarea>
+            <label for="Size">Size:</label>
+            <select id="qrsize" class="form-select" aria-label="Size Selection">
+                <option selected>150x150</option>
+                <option value="200x200">200x200</option>
+                <option value="250x250">250x250</option>
+                <option value="300x300">300x300</option>
+                <option value="350x350">350x350</option>
+                <option value="400x400">400x400</option>
+                <option value="450x450">450x450</option>
+                <option value="500x500">500x500</option>
+            </select>
+
+            <label for="Color">Color:</label>
+            <select id="qrcolor" class="form-select" aria-label="Color Selection">
+                <option selected>1F7176</option>
+                <option value="FCC642">FCC642</option>
+                <option value="000000">Black</option>
+                
+            </select>
+
+            <button type="button" class="btn btn-primary" onclick="gen()">OK</button>
+        </div>
+    </form>
+    <br>
+    <div id="qr">
+        
+    </div>
+            
+    <script>
+        function gen(){
+            var img = document.createElement("img");
+            var size = document.getElementById('qrsize').value;
+            var data = document.getElementById('qrdata').value;
+            var color = document.getElementById('qrcolor').value;
+            var v = "<img src='https://chart.googleapis.com/chart?cht=qr&chld=m&chs=" +  size  + "&chl=" + data + "&chco=" + color + "&choe=UTF-8'/>";
+            document.getElementById("qr").innerHTML = v;
+        }
+    </script>
+    
+</body>
+</html>
