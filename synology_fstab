@@ -1,0 +1,2 @@
+# synology automount
+//192.168.x.x/video /home/kerenyiz/synology/video cifs rw,dir_mode=0777,file_mode=0777,vers=2.0,username=zoli,password=x 0 0
