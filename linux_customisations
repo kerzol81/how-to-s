@@ -1,0 +1,4 @@
+Disable backspace sound:
+
+/etc/inputrc, uncomment set bell-style none
+
