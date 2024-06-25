@@ -4,6 +4,6 @@
   "id_token": null, 
   "scopes": ["https://www.googleapis.com/auth/photoslibrary", "https://www.googleapis.com/auth/photoslibrary.sharing"], 
   "token_uri": "https://oauth2.googleapis.com/token", 
-  "client_id": "a7mh45moj.apps.googleusercontent.com", 
-  "client_secret": "GOCSPX-L-2PAnYoO"
+  "client_id": "a7mh4j.apps.googleusercontent.com", 
+  "client_secret": "GOX-L-2PAnYoO"
 }
