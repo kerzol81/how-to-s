@@ -7,20 +7,27 @@ log_message() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
 }
 
+run_command() {
+    "$@" >> "$LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        log_message "Error: Command '$*' failed."
+        exit 1
+    fi
+}
+
+# Start maintenance
+log_message "Starting regular maintenance."
+
 log_message "Starting package list update."
-sudo apt update >> "$LOG_FILE" 2>&1
-log_message "Package list update completed."
+run_command sudo apt update
 
 log_message "Starting package upgrade."
-sudo apt upgrade -y >> "$LOG_FILE" 2>&1
-log_message "Package upgrade completed."
+run_command sudo apt upgrade -y
 
 log_message "Starting full upgrade."
-sudo apt full-upgrade -y >> "$LOG_FILE" 2>&1
-log_message "Full upgrade completed."
+run_command sudo apt full-upgrade -y
 
 log_message "Starting cleanup of unused packages."
-sudo apt autoremove -y >> "$LOG_FILE" 2>&1
-log_message "Cleanup completed."
+run_command sudo apt autoremove -y
 
 log_message "Regular maintenance completed."
