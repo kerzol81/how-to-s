@@ -23,7 +23,7 @@ BASE_NAME=$(basename "$APE_FILE" .ape)
 echo "Converting $APE_FILE to $BASE_NAME.wav..."
 ffmpeg -i "$APE_FILE" "$BASE_NAME.wav" || { echo "FFmpeg conversion failed"; exit 1; }
 
-echo "Splitting tracks with shnsplit..."
+echo "Splitting tracks..."
 shnsplit -o wav -f "$CUE_FILE" "$BASE_NAME.wav" -t "%n-%t" || { echo "shnsplit failed"; exit 1; }
 
 echo "Cleaning up..."
