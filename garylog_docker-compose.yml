@@ -1,0 +1,54 @@
+services:
+  mongo:
+    image: mongo:4.2
+    container_name: mongo
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: elasticsearch
+    environment:
+      - "discovery.type=single-node"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  graylog:
+    image: graylog/graylog:4.0
+    container_name: graylog
+    environment:
+      GRAYLOG_PASSWORD_SECRET: "7798795b6c77b6ed623558b85a01f325"
+      GRAYLOG_ROOT_PASSWORD_SHA2: "3610930ae279196aaa56601e3df6b7f58901e011cec3dd3b5207ce55e03a86cd"
+      GRAYLOG_HTTP_EXTERNAL_URI: "http://127.0.0.1:9000/"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "9000:9000"
+      - "12201:12201/udp"
+      - "1514:1514/tcp"
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  es_data:
