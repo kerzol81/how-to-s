@@ -7,7 +7,13 @@ VLC_STREAM="http://localhost:554"
 echo "Starting continuous recording and streaming..."
 
 while true; do
-    OUTPUT_FILE="$(date +%Y-%m-%d__%H_%M).wav"
+    DATE_FOLDER="$(date +%Y-%m-%d)"
+    mkdir -p "$DATE_FOLDER"  # Ensure the folder exists
+
+    OUTPUT_FILE="$DATE_FOLDER/$(date +%H_%M_%S).wav"
+
+    echo "Recording to: $OUTPUT_FILE"
+
     arecord -f "$AUDIO_FORMAT" --max-file-time "$SEC" "$OUTPUT_FILE" | \
         cvlc -I dummy --sout "#transcode{acodec=mp3,ab=128,channels=2}:duplicate{dst=std{access=http,mux=raw,dst=$VLC_STREAM}}" &
     wait
