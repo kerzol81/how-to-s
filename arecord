@@ -1,20 +1,31 @@
 #!/bin/sh
 
-SEC=300
-AUDIO_FORMAT="cd"
-VLC_STREAM="http://localhost:554"
+# Recording settings
+SEC=300                      # Recording duration in seconds
+AUDIO_FORMAT="S16_LE"        # 16-bit little endian PCM format
+SAMPLE_RATE=16000            # Sample rate in Hz
+CHANNELS=2                   # Number of channels (1=Mono, 2=Stereo)
+REC_BITRATE=128              # Local recording bitrate in kbps
 
-echo "Starting continuous recording and streaming..."
+# Streaming settings
+VLC_STREAM_PORT=8554         # RTSP stream port
+STREAM_CODEC="aac"           # Codec for streaming (aac recommended)
+STREAM_BITRATE=128           # Streaming bitrate in kbps
+STREAM_SAMPLE_RATE=16000     # Streaming sample rate in Hz
+STREAM_CHANNELS=2            # Streaming channels (1=Mono, 2=Stereo)
+
+echo "Starting continuous recording & RTSP streaming..."
 
 while true; do
-    DATE_FOLDER="$(date +%Y-%m-%d)"
-    mkdir -p "$DATE_FOLDER"  # Ensure the folder exists
+    DAILY_FOLDER="$(date +%Y-%m-%d)"
+    mkdir -p "$DAILY_FOLDER" 
 
-    OUTPUT_FILE="$DATE_FOLDER/$(date +%H_%M_%S).wav"
+    OUTPUT_FILE="$DAILY_FOLDER/$(date +%H_%M_%S).wav"
 
     echo "Recording to: $OUTPUT_FILE"
 
-    arecord -f "$AUDIO_FORMAT" --max-file-time "$SEC" "$OUTPUT_FILE" | \
-        cvlc -I dummy --sout "#transcode{acodec=mp3,ab=128,channels=2}:duplicate{dst=std{access=http,mux=raw,dst=$VLC_STREAM}}" &
-    wait
+    cvlc -vvv alsa://hw:0,0 --sout \
+        "#transcode{acodec=$STREAM_CODEC,ab=${STREAM_BITRATE},channels=$STREAM_CHANNELS,samplerate=$STREAM_SAMPLE_RATE}:rtp{sdp=rtsp://0.0.0.0:$VLC_STREAM_PORT/stream}" &
+
+    arecord -f "$AUDIO_FORMAT" -r "$SAMPLE_RATE" -c "$CHANNELS" --max-file-time "$SEC" "$OUTPUT_FILE"
 done
