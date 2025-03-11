@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# source /path/to/your/logger.sh
+# logger "This a test message" "script.log"
+
 # Graylog server
 REMOTE_SERVER="192.168.50.214"
 REMOTE_PORT="12201"
@@ -35,6 +39,8 @@ logger() {
     echo "Error: Failed to send message to remote server" >&2
     return 1
   fi
+
+  
 
   return 0
 }
