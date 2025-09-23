@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Citric Acid &amp; NaHCO₃ Calculator</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h1 class="card-title text-primary mb-4 text-center">Citric Acid &amp; NaHCO₃ Calculator</h1>
+        <form>
+          <div class="mb-3">
+            <label for="caInput" class="form-label">Citric Acid (g)</label>
+            <input type="number" step="any" class="form-control border-primary" id="caInput" placeholder="Enter citric acid grams">
+          </div>
+          <div class="mb-3">
+            <label for="naInput" class="form-label">NaHCO₃ (g)</label>
+            <input type="number" step="any" class="form-control border-success" id="naInput" placeholder="Enter NaHCO₃ grams">
+          </div>
+          <div class="mb-3">
+            <label for="waterInput" class="form-label">Water (g)</label>
+            <input type="number" step="any" class="form-control border-info" id="waterInput" placeholder="Water needed (g)" disabled>
+          </div>
+          <div class="mb-3">
+            <label for="co2Input" class="form-label">CO₂ (g)</label>
+            <input type="number" step="any" class="form-control border-warning" id="co2Input" placeholder="Expected CO₂ (g)" disabled>
+          </div>
+          <div class="mb-3">
+            <label for="volInput" class="form-label">CO₂ Volume (dm³ at 25°C)</label>
+            <input type="number" step="any" class="form-control border-secondary" id="volInput" placeholder="Expected CO₂ volume (dm³)" disabled>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS & dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const caInput = document.getElementById('caInput');
+    const naInput = document.getElementById('naInput');
+    const waterInput = document.getElementById('waterInput');
+    const co2Input = document.getElementById('co2Input');
+    const volInput = document.getElementById('volInput');
+
+    // Molar masses
+    const M_CA = 192.12;    // g/mol citric acid
+    const M_NA = 84.01;     // g/mol NaHCO₃
+    const M_W = 18.015;     // g/mol H₂O
+    const M_CO2 = 44.01;    // g/mol CO₂
+    const STOICH_RATIO = 3;  // 3 moles per mole citric acid
+    const CO2_VOLUME = 24.5; // dm³ per mole CO₂ at 25°C
+
+    let isUpdating = false;
+
+    function updateFromCA(caGrams) {
+      const molesCA = caGrams / M_CA;
+      const molesCO2 = molesCA * STOICH_RATIO;
+      const naGrams = molesCA * STOICH_RATIO * M_NA;
+      const waterGrams = molesCA * STOICH_RATIO * M_W;
+      const co2Grams = molesCO2 * M_CO2;
+      const co2Volume = molesCO2 * CO2_VOLUME;
+      naInput.value = naGrams.toFixed(2);
+      waterInput.value = waterGrams.toFixed(2);
+      co2Input.value = co2Grams.toFixed(2);
+      volInput.value = co2Volume.toFixed(2);
+    }
+
+    function updateFromNA(naGrams) {
+      const molesNA = naGrams / M_NA;
+      const molesCA = molesNA / STOICH_RATIO;
+      const molesCO2 = molesCA * STOICH_RATIO;
+      const caGrams = molesCA * M_CA;
+      const waterGrams = molesCA * STOICH_RATIO * M_W;
+      const co2Grams = molesCO2 * M_CO2;
+      const co2Volume = molesCO2 * CO2_VOLUME;
+      caInput.value = caGrams.toFixed(2);
+      waterInput.value = waterGrams.toFixed(2);
+      co2Input.value = co2Grams.toFixed(2);
+      volInput.value = co2Volume.toFixed(2);
+    }
+
+    caInput.addEventListener('input', () => {
+      if (isUpdating) return;
+      isUpdating = true;
+      const caGrams = parseFloat(caInput.value);
+      if (!isNaN(caGrams)) {
+        updateFromCA(caGrams);
+      } else {
+        naInput.value = '';
+        waterInput.value = '';
+        co2Input.value = '';
+        volInput.value = '';
+      }
+      isUpdating = false;
+    });
+
+    naInput.addEventListener('input', () => {
+      if (isUpdating) return;
+      isUpdating = true;
+      const naGrams = parseFloat(naInput.value);
+      if (!isNaN(naGrams)) {
+        updateFromNA(naGrams);
+      } else {
+        caInput.value = '';
+        waterInput.value = '';
+        co2Input.value = '';
+        volInput.value = '';
+      }
+      isUpdating = false;
+    });
+  </script>
+</body>
+</html>
