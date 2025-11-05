@@ -1,193 +1,252 @@
 #!/usr/bin/env bash
-# KerZol 05.11.2025
-set -e
+
+set -euo pipefail
 
 MOUNT_POINT="/mnt/pi-boot"
 ROOT_MOUNT="/mnt/pi-root"
 SUMMARY=""
 
-echo "Searching for Raspberry Pi SD card..."
-BOOT_PART=$(lsblk -rno NAME,FSTYPE | awk '$2 ~ /vfat|FAT/ {print "/dev/"$1; exit}')
-ROOT_PART=$(lsblk -rno NAME,FSTYPE | awk '$2 ~ /ext4/ {print "/dev/"$1; exit}')
-[ -z "$BOOT_PART" ] && { echo "No boot partition found."; exit 1; }
+# helper
+err() { echo "ERROR: $*" >&2; }
+info() { echo "$*"; }
+
+### ---- Detect partitions ----
+info "Searching for Raspberry Pi SD card boot partition..."
+BOOT_PART=$(lsblk -rno NAME,FSTYPE | awk '$2 ~ /vfat|FAT/ {print "/dev/"$1; exit}' || true)
+ROOT_PART=$(lsblk -rno NAME,FSTYPE | awk '$2 ~ /ext4/ {print "/dev/"$1; exit}' || true)
+
+if [ -z "${BOOT_PART:-}" ]; then
+  err "No boot partition found. Insert the SD card and try again."
+  exit 1
+fi
 
 sudo mkdir -p "$MOUNT_POINT" "$ROOT_MOUNT"
+info "Mounting $BOOT_PART -> $MOUNT_POINT"
 sudo mount "$BOOT_PART" "$MOUNT_POINT"
-[ -n "$ROOT_PART" ] && sudo mount "$ROOT_PART" "$ROOT_MOUNT" || true
+if [ -n "${ROOT_PART:-}" ]; then
+  info "Mounting $ROOT_PART -> $ROOT_MOUNT"
+  sudo mount "$ROOT_PART" "$ROOT_MOUNT" || true
+fi
 
 echo
-echo "Current configuration:"
-[ -f "$MOUNT_POINT/ssh" ] && echo "SSH enabled" || echo "SSH disabled"
-[ -f "$MOUNT_POINT/wpa_supplicant.conf" ] && grep -E 'ssid=' "$MOUNT_POINT/wpa_supplicant.conf" || echo "No Wi-Fi config"
+echo "Current configuration on the SD-card:"
+[ -f "$MOUNT_POINT/ssh" ] && echo "  - ssh: already enabled" || echo "  - ssh: currently disabled"
+[ -f "$MOUNT_POINT/wpa_supplicant.conf" ] && echo "  - wpa_supplicant.conf: present" || echo "  - wpa_supplicant.conf: not present"
 
-read -p "Enable SSH? (y/n, blank = keep): " ENABLE_SSH
-case "$ENABLE_SSH" in
-  [Yy]*) sudo touch "$MOUNT_POINT/ssh"; SUMMARY+="\nSSH: Enabled";;
-  [Nn]*) sudo rm -f "$MOUNT_POINT/ssh"; SUMMARY+="\nSSH: Disabled";;
-  *) SUMMARY+="\nSSH: unchanged";;
-esac
+### ---- Enable SSH ----
+read -p "Enable SSH on first boot? (Y/n, default Y): " ENABLE_SSH
+ENABLE_SSH=${ENABLE_SSH:-Y}
+if [[ "$ENABLE_SSH" =~ ^[Yy] ]]; then
+  sudo touch "$MOUNT_POINT/ssh"
+  SUMMARY+="\nSSH: Enabled"
+  info "ssh file created in boot partition."
+else
+  sudo rm -f "$MOUNT_POINT/ssh"
+  SUMMARY+="\nSSH: Disabled"
+  info "SSH will be disabled on first boot."
+fi
 
+### ---- Ethernet static or dynamic ----
 echo
-read -p "Configure Wi-Fi? (y/n): " CHANGE_WIFI
-if [[ "$CHANGE_WIFI" =~ ^[Yy]$ ]]; then
-  command -v nmcli >/dev/null && sudo nmcli dev wifi list | awk 'NR==1 || /([2-5]G)/{print}'
-  echo
-  read -p "   SSID: " WIFI_SSID
-  read -s -p "   Password: " WIFI_PASS; echo
-  read -p "   Country code (e.g. GB, DE, FR, HU): " COUNTRY
-  echo "Writing Wi-Fi config..."
-  cat <<EOF | sudo tee "$MOUNT_POINT/wpa_supplicant.conf" >/dev/null
-country=$COUNTRY
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-network={
-    ssid="$WIFI_SSID"
-    psk="$WIFI_PASS"
-    key_mgmt=WPA-PSK
-}
-EOF
-  SUMMARY+="\nWi-Fi: $WIFI_SSID ($COUNTRY)"
+read -p "Should Ethernet (eth0) use a static IP or dynamic (DHCP)? (static/dynamic, default dynamic): " ETH_CHOICE
+ETH_CHOICE=${ETH_CHOICE:-dynamic}
 
-  ### --- Wi-Fi static or dynamic ---
-  echo
-  read -p "Should Wi-Fi use a static IP? (y/n): " WIFI_STATIC
-  if [[ "$WIFI_STATIC" =~ ^[Yy]$ && -d "$ROOT_MOUNT/etc" ]]; then
-      read -p "   Static Wi-Fi IP (default 192.168.50.20): " WIFI_IP
-      WIFI_IP=${WIFI_IP:-192.168.50.20}
-      read -p "   Gateway (default 192.168.50.1): " WIFI_GW
-      WIFI_GW=${WIFI_GW:-192.168.50.1}
-      read -p "   DNS (default 1.1.1.1 8.8.8.8): " WIFI_DNS
-      WIFI_DNS=${WIFI_DNS:-"1.1.1.1 8.8.8.8"}
+if [[ "$ETH_CHOICE" == "static" ]]; then
+  read -p "   Desired static Ethernet IP (e.g. 192.168.50.10): " ETH_IP
+  read -p "   Gateway (default 192.168.50.1): " ETH_GW
+  ETH_GW=${ETH_GW:-192.168.50.1}
+  read -p "   DNS servers (space-separated, default 1.1.1.1 8.8.8.8): " ETH_DNS
+  ETH_DNS=${ETH_DNS:-"1.1.1.1 8.8.8.8"}
 
-      if ping -c1 -W1 "$WIFI_IP" >/dev/null 2>&1; then
-          echo "$WIFI_IP already in use. Skipping static Wi-Fi IP."
-          SUMMARY+="\nWi-Fi IP: conflict detected"
-      else
-          if [ -x "$ROOT_MOUNT/usr/bin/nmcli" ]; then
-              echo "NetworkManager detected – creating first-boot static IP service..."
-              sudo bash -c "cat <<EOF > $ROOT_MOUNT/etc/systemd/system/set-wifi-static.service
+  info "Checking whether $ETH_IP responds to ping..."
+  if ping -c1 -W1 "$ETH_IP" >/dev/null 2>&1; then
+    err "IP $ETH_IP appears to be in use (responded to ping). Choose another IP or set DHCP."
+    SUMMARY+="\nEthernet: static ($ETH_IP) - conflict detected (skipped)"
+    ETH_SET=false
+  else
+    ETH_SET=true
+    if [ -x "$ROOT_MOUNT/usr/bin/nmcli" ]; then
+      info "NetworkManager detected in rootfs — adding first-boot service to set eth static via nmcli."
+      sudo bash -c "cat > $ROOT_MOUNT/etc/systemd/system/set-eth-static.service <<'EOF'
 [Unit]
-Description=Configure static Wi-Fi via NetworkManager
+Description=Set static IPv4 for eth0 via NetworkManager on first boot
 After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/nmcli connection modify \"$WIFI_SSID\" ipv4.addresses $WIFI_IP/24
-ExecStart=/usr/bin/nmcli connection modify \"$WIFI_SSID\" ipv4.gateway $WIFI_GW
-ExecStart=/usr/bin/nmcli connection modify \"$WIFI_SSID\" ipv4.dns \"$WIFI_DNS\"
-ExecStart=/usr/bin/nmcli connection modify \"$WIFI_SSID\" ipv4.method manual
-ExecStart=/usr/bin/nmcli connection up \"$WIFI_SSID\"
+ExecStart=/usr/bin/nmcli connection show --active | /bin/grep -q eth0 && true || true
+ExecStart=/usr/bin/nmcli connection modify 'Wired connection 1' ipv4.addresses ${ETH_IP}/24 || true
+ExecStart=/usr/bin/nmcli connection modify 'Wired connection 1' ipv4.gateway ${ETH_GW} || true
+ExecStart=/usr/bin/nmcli connection modify 'Wired connection 1' ipv4.dns \"${ETH_DNS}\" || true
+ExecStart=/usr/bin/nmcli connection modify 'Wired connection 1' ipv4.method manual || true
+ExecStart=/usr/bin/nmcli connection up 'Wired connection 1' || true
 RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
 EOF"
-              sudo chroot "$ROOT_MOUNT" systemctl enable set-wifi-static.service 2>/dev/null || true
-              SUMMARY+="\nWi-Fi static IP ($WIFI_IP) via NetworkManager"
-          else
-              echo "No NetworkManager found – falling back to dhcpcd.conf"
-              cat <<EOF | sudo tee -a "$ROOT_MOUNT/etc/dhcpcd.conf" >/dev/null
+      sudo chroot "$ROOT_MOUNT" systemctl enable set-eth-static.service 2>/dev/null || true
+      SUMMARY+="\nEthernet: static ($ETH_IP) via NetworkManager service (first-boot)"
+    else
+      # fallback to dhcpcd.conf
+      info "No NetworkManager in rootfs — appending to /etc/dhcpcd.conf"
+      sudo bash -c "cat >> $ROOT_MOUNT/etc/dhcpcd.conf <<EOF
 
-# Static Wi-Fi added by rpi_setup.sh
-interface wlan0
-static ip_address=$WIFI_IP/24
-static routers=$WIFI_GW
-static domain_name_servers=$WIFI_DNS
-EOF
-              SUMMARY+="\nWi-Fi static IP ($WIFI_IP) via dhcpcd"
-          fi
-      fi
-  else
-      SUMMARY+="\nWi-Fi IP: dynamic (DHCP)"
+# Added by rpi_setup.sh - static eth0
+interface eth0
+static ip_address=${ETH_IP}/24
+static routers=${ETH_GW}
+static domain_name_servers=${ETH_DNS}
+EOF"
+      SUMMARY+="\nEthernet: static ($ETH_IP) via dhcpcd.conf"
+    fi
   fi
+else
+  SUMMARY+="\nEthernet: dynamic (DHCP)"
+  ETH_SET=false
+fi
 
-  ### --- Auto-set Wi-Fi country ---
-  if [ -d "$ROOT_MOUNT/etc" ]; then
-    echo "Adding first-boot Wi-Fi country fix..."
-    sudo bash -c "cat <<'EOF' > $ROOT_MOUNT/etc/systemd/system/set-wifi-country.service
+
+info
+info "Setting default 'pi' user with password 'raspberry' (userconf.txt)..."
+HASH_PI=$(openssl passwd -6 "raspberry")
+echo "pi:$HASH_PI" | sudo tee "$MOUNT_POINT/userconf.txt" >/dev/null
+SUMMARY+="\nUser: pi (password: raspberry)"
+
+echo
+read -p "Would you like to create an additional user on first boot? (y/n, default n): " CREATE_EXTRA
+CREATE_EXTRA=${CREATE_EXTRA:-n}
+if [[ "$CREATE_EXTRA" =~ ^[Yy] ]]; then
+  read -p "   Enter new username (no spaces): " EXTRA_USER
+  if [[ -z "$EXTRA_USER" ]]; then
+    err "No username entered — skipping extra user creation."
+    SUMMARY+="\nExtra user: none"
+  else
+    read -s -p "   Enter password for $EXTRA_USER: " EXTRA_PASS; echo
+    read -s -p "   Confirm password: " EXTRA_PASS2; echo
+    if [[ "$EXTRA_PASS" != "$EXTRA_PASS2" ]]; then
+      err "Passwords do not match — skipping extra user creation."
+      SUMMARY+="\nExtra user: skipped (password mismatch)"
+    else
+      if [ -d "$ROOT_MOUNT/etc" ]; then
+        info "Creating first-boot script to add user $EXTRA_USER..."
+        sudo bash -c "cat > $ROOT_MOUNT/usr/local/sbin/create-extra-user.sh <<'EOF'
+#!/bin/bash
+# create-extra-user.sh - run at first boot to add an extra user
+set -e
+USERNAME='${EXTRA_USER}'
+PASSWORD='${EXTRA_PASS}'
+if ! id \"\$USERNAME\" >/dev/null 2>&1; then
+  useradd -m -s /bin/bash \"\$USERNAME\"
+  echo \"\$USERNAME:\$PASSWORD\" | chpasswd
+  usermod -aG sudo \"\$USERNAME\"
+fi
+# remove this script afterwards
+rm -f /usr/local/sbin/create-extra-user.sh
+EOF"
+        sudo chmod +x "$ROOT_MOUNT/usr/local/sbin/create-extra-user.sh"
+        sudo bash -c "cat > $ROOT_MOUNT/etc/systemd/system/create-extra-user.service <<'EOF'
 [Unit]
-Description=Set Wi-Fi country to unblock WLAN
-After=network-pre.target
-Before=network.target
+Description=Create extra user on first boot
+After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/raspi-config nonint do_wifi_country $COUNTRY
-ExecStartPost=/usr/sbin/rfkill unblock wifi
+ExecStart=/usr/local/sbin/create-extra-user.sh
 RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
 EOF"
-    sudo chroot "$ROOT_MOUNT" systemctl enable set-wifi-country.service 2>/dev/null || true
-    SUMMARY+="\nWi-Fi country: $COUNTRY (auto-set on first boot)"
+        sudo chroot "$ROOT_MOUNT" systemctl enable create-extra-user.service 2>/dev/null || true
+        SUMMARY+="\nExtra user: $EXTRA_USER (created on first boot)"
+      else
+        err "Root partition not mounted — cannot create extra-user service."
+        SUMMARY+="\nExtra user: failed (root not mounted)"
+      fi
+    fi
   fi
 else
-  SUMMARY+="\nWi-Fi: unchanged"
-fi
-
-### --- Default user ---
-echo
-HASH=$(openssl passwd -6 "raspberry")
-echo "pi:$HASH" | sudo tee "$MOUNT_POINT/userconf.txt" >/dev/null
-SUMMARY+="\nUser: pi / raspberry"
-
-echo
-read -p "Set a static IP for eth0? (y/n): " ETH_STATIC
-if [[ "$ETH_STATIC" =~ ^[Yy]$ && -d "$ROOT_MOUNT/etc" ]]; then
-  read -p "   Static Ethernet IP (default 192.168.50.10): " ETH_IP
-  ETH_IP=${ETH_IP:-192.168.50.10}
-  read -p "   Gateway (default 192.168.50.1): " ETH_GW
-  ETH_GW=${ETH_GW:-192.168.50.1}
-  read -p "   DNS (default 1.1.1.1): " ETH_DNS
-  ETH_DNS=${ETH_DNS:-1.1.1.1}
-  if ping -c1 -W1 "$ETH_IP" >/dev/null 2>&1; then
-      echo "$ETH_IP already in use. Skipping Ethernet static IP."
-      SUMMARY+="\nEthernet IP: conflict detected"
-  else
-      cat <<EOF | sudo tee -a "$ROOT_MOUNT/etc/dhcpcd.conf" >/dev/null
-
-# Static Ethernet added by rpi_setup.sh
-interface eth0
-static ip_address=$ETH_IP/24
-static routers=$ETH_GW
-static domain_name_servers=$ETH_DNS
-EOF
-      SUMMARY+="\nEthernet static IP: $ETH_IP"
-  fi
-else
-  SUMMARY+="\nEthernet IP: dynamic (DHCP)"
+  SUMMARY+="\nExtra user: none"
 fi
 
 echo
-read -p "Unmount and finish? (y/n): " UNMOUNT
-if [[ "$UNMOUNT" =~ ^[Yy]$ ]]; then
+echo "===================================="
+echo "SD card prepared. Next steps:"
+echo "  1) Unmount the SD card from this machine (if not already)."
+echo "  2) Insert SD into Raspberry Pi and power it on."
+echo "===================================="
+echo
+
+read -p "Unmount the SD card now? (Y/n, default Y): " DO_UM
+DO_UM=${DO_UM:-Y}
+if [[ "$DO_UM" =~ ^[Yy] ]]; then
   sudo umount "$MOUNT_POINT" || true
   sudo umount "$ROOT_MOUNT" || true
-  echo "SD card ready to boot."
+  info "SD card unmounted. Insert into Raspberry Pi and power it on."
 else
-  echo "Remember to unmount manually: sudo umount $MOUNT_POINT && sudo umount $ROOT_MOUNT"
+  info "SD card remains mounted. Make sure to unmount before removing."
 fi
 
 echo
-echo "====== CONFIGURATION SUMMARY ======"
+if [[ "$ETH_CHOICE" == "static" && "$ETH_SET" == true ]]; then
+  echo "Since you chose a static Ethernet IP ($ETH_IP), once the Pi is powered you can SSH to it."
+  read -p "Do you want the script to attempt to SSH now to ${ETH_IP}? (y/n): " DO_SSH
+  if [[ "$DO_SSH" =~ ^[Yy]$ ]]; then
+    read -p "SSH username (default 'pi'): " SSH_USER
+    SSH_USER=${SSH_USER:-pi}
+    info "Attempting to connect: ssh ${SSH_USER}@${ETH_IP}"
+    echo "If SSH hangs, press Ctrl+C and try later."
+    ssh "${SSH_USER}@${ETH_IP}" || {
+      err "SSH attempt failed or was interrupted. You can retry manually: ssh ${SSH_USER}@${ETH_IP}"
+    }
+  else
+    info "Skipping SSH attempt. You can connect after boot: ssh pi@${ETH_IP}"
+  fi
+
+else
+  read -p "ETH set to dynamic or static was skipped. Would you like to scan the network to find the Pi? (y/n): " DO_SCAN
+  DO_SCAN=${DO_SCAN:-n}
+  if [[ "$DO_SCAN" =~ ^[Yy]$ ]]; then
+    if ! command -v nmap >/dev/null 2>&1; then
+      err "nmap is not installed on this machine. Install it (sudo apt install nmap) and re-run the scan."
+    else
+      read -p "Enter subnet to scan (default 192.168.50.0/24): " SUBNET
+      SUBNET=${SUBNET:-192.168.50.0/24}
+      echo "Scanning ${SUBNET} every 8s until a Raspberry Pi is found (Ctrl+C to cancel)..."
+      while true; do
+        FOUND=$(sudo nmap -sn "$SUBNET" 2>/dev/null | grep -iE "Raspberry Pi Trading|Raspberry Pi Foundation" || true)
+        if [[ -n "$FOUND" ]]; then
+          echo "🍓 Raspberry Pi detected on the network:"
+          sudo nmap -sn "$SUBNET" | awk '
+            /Nmap scan report/ {ip=$5; name=$4; next}
+            /MAC Address/ {
+              mac=$3; vendor=$0;
+              if ($0 ~ /Raspberry Pi Trading|Raspberry Pi Foundation/) {
+                printf("  Raspberry Pi: %s (%s) [%s]\n", name, ip, mac);
+              }
+            }'
+          break
+        else
+          echo "No Raspberry Pi found yet — retrying in 8s..."
+          sleep 8
+        fi
+      done
+    fi
+  else
+    info "Skipping network scan."
+  fi
+fi
+
+
+echo
+echo "====== SUMMARY ======"
 echo -e "$SUMMARY"
 echo "====================================="
-echo "Insert the SD card into your Raspberry Pi and power it on."
-echo "   Wi-Fi static IP and country will be applied automatically on first boot."
+echo "Notes:"
+echo " - Default user 'pi' with password 'raspberry' will be created (userconf.txt)."
+echo " - Extra user (if configured) will be created on first boot."
+echo " - If you created NetworkManager first-boot services they will run the first time the Pi boots and then remain enabled."
+echo " - To re-enable Wi-Fi (if you blocked it earlier) on the Pi: sudo rfkill unblock wifi"
 echo
-
-read -p "Would you like to run an Nmap network scan to find your Raspberry Pi? (y/n): " RUN_NMAP
-if [[ "$RUN_NMAP" =~ ^[Yy]$ ]]; then
-  if ! command -v nmap >/dev/null 2>&1; then
-      echo "Nmap not found. Install it with: sudo apt install nmap"
-  else
-      read -p "   Enter subnet to scan (default 192.168.50.0/24): " SUBNET
-      SUBNET=${SUBNET:-192.168.50.0/24}
-      echo "Scanning your network for Raspberry Pi devices..."
-      sudo nmap -sn "$SUBNET" | grep -E "Nmap scan report|MAC Address"
-      echo "Scan complete."
-  fi
-else
-  echo "Skipping network scan."
-fi
+info "Setup script finished."
