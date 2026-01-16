@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# KZ 16.01.2026.
 
 import subprocess
 import re
